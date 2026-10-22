@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin Panel</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#0b0b0b;color:#eee;font-family:system-ui,sans-serif;display:grid;grid-template-columns:420px 1fr;height:100vh}
+  aside{overflow:auto;padding:1.2rem;border-right:1px solid #222}
+  h3{margin:1.2rem 0 .5rem;font-size:.8rem;letter-spacing:.12em;color:#888;text-transform:uppercase}
+  select{width:100%;background:#151515;border:1px solid #2d2d2d;color:#fff;padding:.6rem;border-radius:8px;margin-bottom:.4rem}
+  input,textarea{width:100%;background:#151515;border:1px solid #2d2d2d;color:#fff;padding:.6rem;border-radius:8px;font:inherit;margin-bottom:.4rem}
+  textarea{min-height:90px;resize:vertical}
+  button{background:#fff;color:#000;border:0;padding:.6rem 1rem;border-radius:8px;font-weight:600;cursor:pointer}
+  button.s{background:#222;color:#fff;padding:.4rem .7rem}
+  .row{display:flex;gap:.4rem}.row input{margin:0 0 .4rem}
+  .box{border:1px solid #222;border-radius:10px;padding:.6rem;margin-bottom:.6rem}
+  #msg{margin-top:.8rem;font-size:.9rem;color:#9f9}
+  iframe{width:100%;height:100%;border:0;background:#050505}
+  #login{display:none}
+  @media(max-width:900px){body{grid-template-columns:1fr;height:auto}iframe{height:70vh}}
+</style>
+</head>
+<body>
+<aside>
+  <h2 style="margin:0">Admin Panel</h2>
+  <details id="cfg" open>
+    <summary style="cursor:pointer;margin-top:1rem">GitHub bağlantısı</summary>
+    <input id="owner" placeholder="GitHub kullanıcı adın">
+    <input id="repo" placeholder="Repo adı (örn: kullanici.github.io)">
+    <input id="branch" placeholder="Branch (main)" value="main">
+    <input id="token" type="password" placeholder="Personal Access Token">
+    <button class="s" onclick="saveCfg()">Kaydet ve yükle</button>
+  </details>
+
+  <h3>Genel</h3>
+  <input id="f_name" placeholder="İsim">
+  <input id="f_line" placeholder="İsim altındaki ek yazı (developer portfolio üstü)">
+  <input id="f_subtitle" placeholder="Alt başlık">
+
+  <label style="display:block;margin:.6rem 0"><input type="checkbox" id="f_status" style="width:auto" onchange="data.status=this.checked;sync()"> Yeşil çevrimiçi noktası</label>
+  <h3>Linkler</h3><div id="links"></div>
+  <button class="s" onclick="add('links')">+ Link ekle</button>
+
+
+  <div style="margin-top:1.5rem"><button onclick="publish()">Yayınla (GitHub'a kaydet)</button></div>
+  <div id="msg"></div>
+</aside>
+<iframe id="prev" src="index.html"></iframe>
+
+<datalist id="icons"><option value="auto"><option value="x"><option value="linkedin"><option value="github"><option value="discord"><option value="upwork"><option value="instagram"><option value="youtube"><option value="tiktok"><option value="twitch"><option value="telegram"><option value="spotify"><option value="whatsapp"><option value="facebook"><option value="reddit"><option value="steam"><option value="snapchat"><option value="pinterest"><option value="threads"><option value="bluesky"><option value="kick"><option value="patreon"><option value="paypal"><option value="medium"><option value="behance"><option value="dribbble"><option value="figma"><option value="gitlab"><option value="stackoverflow"><option value="codepen"><option value="npm"><option value="kaggle"><option value="email"><option value="link"></datalist>
+<script>
+const $=id=>document.getElementById(id);
+let data={name:'',subtitle:'',about:'',links:[],projects:[]}, sha=null;
+const cfg=()=>JSON.parse(localStorage.getItem('cfg')||'{}');
+function loadCfgInputs(){const c=cfg();['owner','repo','branch','token'].forEach(k=>{if(c[k])$(k).value=c[k]})}
+function saveCfg(){localStorage.setItem('cfg',JSON.stringify({owner:$('owner').value.trim(),repo:$('repo').value.trim(),branch:$('branch').value.trim()||'main',token:$('token').value.trim()}));load()}
+const api=()=>{const c=cfg();return `https://api.github.com/repos/${c.owner}/${c.repo}/contents/content.json`}
+const hdr=()=>({Authorization:'Bearer '+cfg().token,Accept:'application/vnd.github+json'});
+const b64enc=s=>btoa(String.fromCharCode(...new TextEncoder().encode(s)));
+const b64dec=s=>new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\n/g,'')),c=>c.charCodeAt(0)));
+function say(t,err){$('msg').style.color=err?'#f88':'#9f9';$('msg').textContent=t}
+
+async function load(){
+  const c=cfg();
+  if(!c.token){ try{data=await (await fetch('content.json?t='+Date.now())).json()}catch{} draw(); return }
+  try{
+    const r=await fetch(api()+'?ref='+c.branch,{headers:hdr()});
+    if(!r.ok) throw new Error('GitHub: '+r.status);
+    const j=await r.json(); sha=j.sha; data=JSON.parse(b64dec(j.content)); say('Yüklendi ✓'); $('cfg').open=false;
+  }catch(e){say(e.message,1)}
+  draw();
+}
+function draw(){
+  $('f_name').value=data.name||'';$('f_line').value=data.line||'';$('f_status').checked=!!data.status;$('f_subtitle').value=data.subtitle||'';
+  ['links'].forEach(k=>{
+    $(k).innerHTML=(data[k]||[]).map((it,i)=>`<div class="box">`+
+      (k==='links'
+        ?`<input list="icons" value="${esc(it.icon||'auto')}" placeholder="ikon (auto = linkten kendisi bulur)" oninput="data.links[${i}].icon=this.value;sync()"><input value="${esc(it.label)}" placeholder="İsim (üstüne gelince görünür)" oninput="data.links[${i}].label=this.value;sync()"><input value="${esc(it.url)}" placeholder="https://..." oninput="data.links[${i}].url=this.value;sync()">`
+        :`<input value="${esc(it.title)}" placeholder="Başlık" oninput="data.projects[${i}].title=this.value;sync()"><input value="${esc(it.desc)}" placeholder="Açıklama" oninput="data.projects[${i}].desc=this.value;sync()"><input value="${esc(it.url)}" placeholder="https://..." oninput="data.projects[${i}].url=this.value;sync()">`)
+      +`<button class="s" onclick="del('${k}',${i})">Sil</button></div>`).join('');
+  });
+  sync();
+}
+function esc(s){return String(s??'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;')}
+function add(k){data[k]=data[k]||[];data[k].push(k==='links'?{label:'',icon:'auto',url:''}:{title:'',desc:'',url:''});draw()}
+function del(k,i){data[k].splice(i,1);draw()}
+['name','line','subtitle'].forEach(k=>$('f_'+k).addEventListener('input',e=>{data[k]=e.target.value;sync()}));
+function sync(){$('prev').contentWindow.postMessage({type:'preview',data},location.origin)}
+$('prev').addEventListener('load',sync);
+
+async function publish(){
+  const c=cfg(); if(!c.token) return say('Önce GitHub bilgilerini gir',1);
+  say('Kaydediliyor...');
+  try{
+    const r=await fetch(api(),{method:'PUT',headers:hdr(),body:JSON.stringify({message:'Admin panelinden güncelleme',content:b64enc(JSON.stringify(data,null,2)),sha,branch:c.branch})});
+    const j=await r.json(); if(!r.ok) throw new Error(j.message||r.status);
+    sha=j.content.sha; say('Yayınlandı ✓ (site 1 dk içinde güncellenir)');
+  }catch(e){say('Hata: '+e.message,1)}
+}
+loadCfgInputs(); load();
+</script>
+</body>
+</html>

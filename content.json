@@ -1,0 +1,38 @@
+{
+  "name": "Krup Kantesariya",
+  "subtitle": "developer portfolio",
+  "status": true,
+  "links": [
+    {
+      "label": "X",
+      "icon": "x",
+      "url": "https://x.com/"
+    },
+    {
+      "label": "LinkedIn",
+      "icon": "linkedin",
+      "url": "https://linkedin.com/"
+    },
+    {
+      "label": "GitHub",
+      "icon": "github",
+      "url": "https://github.com/"
+    },
+    {
+      "label": "Discord",
+      "icon": "discord",
+      "url": "https://discord.com/"
+    },
+    {
+      "label": "Instagram",
+      "icon": "instagram",
+      "url": "https://instagram.com/"
+    },
+    {
+      "label": "Upwork",
+      "icon": "upwork",
+      "url": "https://upwork.com/"
+    }
+  ],
+  "line": "Full-stack · Web · Oyun"
+}
