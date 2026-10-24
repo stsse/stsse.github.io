@@ -4,34 +4,39 @@
   "status": true,
   "links": [
     {
-      "label": "X",
-      "icon": "x",
-      "url": "https://x.com/"
-    },
-    {
-      "label": "LinkedIn",
-      "icon": "linkedin",
-      "url": "https://linkedin.com/"
-    },
-    {
       "label": "GitHub",
       "icon": "github",
-      "url": "https://github.com/"
+      "url": "https://github.com/stsse"
     },
     {
       "label": "Discord",
       "icon": "discord",
-      "url": "https://discord.com/"
+      "url": "9f80bd0cfc4111f3"
     },
     {
       "label": "Instagram",
       "icon": "instagram",
-      "url": "https://instagram.com/"
+      "url": "https://www.instagram.com/stssehub/"
     },
     {
-      "label": "Upwork",
-      "icon": "upwork",
-      "url": "https://upwork.com/"
+      "label": "Spotify",
+      "icon": "",
+      "url": "https://open.spotify.com/user/313a7fd2555m2gavjz6qbzfaj7na?si=0bde38caf8d3475f"
+    },
+    {
+      "label": "BlueSky",
+      "icon": "bluesky",
+      "url": "https://bsky.app/profile/did:plc:xyrw3asaagx5g446cct6euii"
+    },
+    {
+      "label": "Reddit",
+      "icon": "auto",
+      "url": "https://www.reddit.com/user/stsse/"
+    },
+    {
+      "label": "Telegram",
+      "icon": "",
+      "url": "https://t.me/stayforpain"
     }
   ],
   "line": "stsse"
